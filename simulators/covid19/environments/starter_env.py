@@ -2,7 +2,7 @@ import numpy as np
 
 from whynot.gym import spaces
 from whynot.gym.envs import ODEEnvBuilder, register
-from whynot.simulators.covid19 import Config, Intervention, simulate, State
+from simulators.covid19 import Config, Intervention, simulate, State
 
 
 def get_intervention(action, time):

@@ -2,7 +2,7 @@
 
 from whynot.dynamics import DynamicsExperiment
 from whynot.framework import parameter
-from whynot.simulators import covid19
+from simulators import covid19
 
 
 __all__ = ["get_experiments", "COVID19RCT"]
