@@ -25,7 +25,7 @@ After going through the notebook the next file you might want to explore would b
 This file contains the code related to the SEIHRD model. Its composed of the set of variables involved in the model and 
 the set of equations that governs the dynamics of how the state of the model updates through time.
 
-Finally we have the set of environments in the `simulators/covid19/enviroments` folder. Tey are all composed of a reward
+Finally we have the set of environments in the `simulators/covid19/enviroments` folder. They are all composed of a reward
 function, a definition of the state space and function that defines the intervention operations. Most of these environments
 differ only slightly in the reward function or the way interventions are performed.
 
