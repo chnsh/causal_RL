@@ -70,9 +70,9 @@ class State(BaseState):
     """State of the COVID-19 simulator.
 
     The default state corresponds to an early infection state, defined by Adams
-    et al. The early infection state is designed based on an unstable uninfected
-    steady state by 1) adding one virus particle per ml of blood plasma, and 2)
-    adding low levels of infected T-cells.
+    et al. The early infection state is designed based on an unstable
+    uninfected steady state by 1) adding one virus particle per ml of blood
+    plasma, and 2) adding low levels of infected T-cells.
     """
 
     # pylint: disable-msg=invalid-name
@@ -96,7 +96,8 @@ class Intervention(BaseIntervention):
 
     Examples
     --------
-    >>> # Starting in step 100, set beta to 0.7 (leaving other variables unchanged)
+    >>> # Starting in step 100, set beta to 0.7
+    >>> #(leaving other variables unchanged)
     >>> Intervention(time=100, beta=0.7)
 
     """
@@ -126,8 +127,8 @@ def dynamics(state, time, config: Config, intervention=None):
         config: covid19.Config
             Simulator configuration object that determines the coefficients
         intervantion: covid19.Intervention
-            Simulator intervention object that determines when/how to update the
-            dynamics.
+            Simulator intervention object that determines when/how to update
+            the dynamics.
 
     Returns
     -------
@@ -159,35 +160,43 @@ def dynamics(state, time, config: Config, intervention=None):
     tau_i_factor = config.tau_i * config.tau_i_scale_factor
     tau_h_factor = config.tau_h * config.tau_h_scale_factor
 
-    ## Differential dynamics start ##
-    delta_susceptible = -beta_factor * (susceptible * infected) / total_population
+    # Differential dynamics start ##
+    delta_susceptible = -beta_factor * (susceptible
+                                        * infected) / total_population
 
-    delta_exposed = beta_factor * (susceptible * infected) / total_population - (
+    delta_exposed = beta_factor * (
+            susceptible * infected) / total_population - (
         sigma_factor) * exposed
 
     delta_infected = sigma_factor * exposed - (mu_i_factor * (
-            1 - config.proportion_hospitalized) * config.proportion_recovered_without_hospitalization +
-                                               tau_i_factor * (
-                                                       1 - config.proportion_hospitalized) *
-                                               config.proportion_dead_without_hospitalization +
-                                               gamma_factor * config.proportion_hospitalized) * infected
+            1 - config.proportion_hospitalized)
+                    * config.proportion_recovered_without_hospitalization +
+                    tau_i_factor * (1 - config.proportion_hospitalized)
+                    * config.proportion_dead_without_hospitalization +
+                    gamma_factor * config.proportion_hospitalized) * infected
 
-    delta_hospitalized = gamma_factor * config.proportion_hospitalized * infected - (
-            tau_h_factor * config.proportion_dead_after_hospitalization +
-            mu_h_factor * config.proportion_recovered_after_hospitalization) * hospitalized
+    inter1 = (tau_h_factor * config.proportion_dead_after_hospitalization
+              + mu_h_factor
+              * config.proportion_recovered_after_hospitalization)
+    delta_hospitalized = gamma_factor * (config.proportion_hospitalized
+                                         * infected) - inter1 * hospitalized
 
-    delta_recovered = mu_i_factor * (
-            1 - config.proportion_hospitalized) * config.proportion_recovered_without_hospitalization * infected + \
-                      mu_h_factor * config.proportion_recovered_after_hospitalization * hospitalized
+    inter1 = (config.proportion_recovered_without_hospitalization
+              * infected + mu_h_factor
+              * config.proportion_recovered_after_hospitalization
+              * hospitalized)
+    delta_recovered = mu_i_factor * (1
+                                     - config.proportion_hospitalized) * inter1
+    inter1 = (config.proportion_dead_without_hospitalization
+              * infected + tau_h_factor
+              * config.proportion_dead_after_hospitalization * hospitalized)
+    delta_deceased = tau_i_factor * (1
+                                     - config.proportion_hospitalized) * inter1
 
-    delta_deceased = tau_i_factor * (
-            1 - config.proportion_hospitalized) * config.proportion_dead_without_hospitalization * infected + \
-                     tau_h_factor * config.proportion_dead_after_hospitalization * hospitalized
-
-    ## Differential dynamics end ##
-
+    # Differential dynamics end
     ds_dt = [
-        delta_susceptible, delta_exposed, delta_infected, delta_hospitalized, delta_recovered, delta_deceased
+        delta_susceptible, delta_exposed, delta_infected, delta_hospitalized,
+        delta_recovered, delta_deceased
     ]
     return ds_dt
 
@@ -203,9 +212,11 @@ def simulate(initial_state, config, intervention=None, seed=None):
         initial_state:  `whynot.simulators.covid19.State`
             Initial State object, which is used as x_{t_0} for the simulator.
         config:  `whynot.simulators.covid19.Config`
-            Config object that encapsulates the parameters that define the dynamics.
+            Config object that encapsulates the parameters that define the
+            dynamics.
         intervention: `whynot.simulators.covid19.Intervention`
-            Intervention object that specifies what, if any, intervention to perform.
+            Intervention object that specifies what, if any, intervention to
+            perform.
         seed: int
             Seed to set internal randomness. The simulator is deterministic, so
             the seed parameter is ignored.

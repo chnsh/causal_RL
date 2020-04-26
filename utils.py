@@ -63,7 +63,8 @@ class NNPolicy(Policy):
         return self.seq.double()((obs.double()))
 
     def log_prob(self, obs, action):
-        """Compute the log probability of an action under the given observation.
+        """Compute the log probability of an action under the given
+        observation.
 
         Parameters
         ----------
@@ -72,7 +73,8 @@ class NNPolicy(Policy):
 
         Returns
         -------
-        A Tensor of shape [batch_size, 1], the log probabilities of the actions.
+        A Tensor of shape [batch_size, 1], the log probabilities of the
+        actions.
         """
         log_probs = nn.functional.log_softmax(self.forward(obs), dim=1)[
                     :,
@@ -95,14 +97,14 @@ class NNPolicy(Policy):
             return np.random.randint(self.ac_dim)
         if len(obs.shape) != 1 or obs.shape[0] != self.obs_dim:
             raise ValueError(
-                "Expected input observation shape [obs_dim], got %s" % str(obs.shape)
+                "Expected input observation shape [obs_dim], got %s"
+                % str(obs.shape)
             )
         obs = torch.tensor(obs.reshape(1, -1), dtype=torch.float64)
         # When sampling use eval mode.
         return (
-            torch.distributions.Categorical(logits=self.eval().double().forward(obs))
-                .sample()
-                .item()
+            torch.distributions.Categorical(
+                logits=self.eval().double().forward(obs)).sample().item()
         )
 
 
@@ -120,18 +122,20 @@ class PolicyGradientAgent:
 
         Parameters
         ----------
-        trajectories: A list of dictionaries. Each dictionary has keys `observation`,
-        `action`, `reward`, `next_observation`, `terminal`, each mapping to a numpy array
-        of shape [num_steps, ?].
+        trajectories: A list of dictionaries. Each dictionary has keys
+        `observation`, `action`, `reward`, `next_observation`, `terminal`,
+        each mapping to a numpy array of shape [num_steps, ?].
 
         Returns
         -------
         A scalar, training loss.
         """
-        obs = np.concatenate([tau["observation"] for tau in trajectories], axis=0)
+        obs = np.concatenate([tau["observation"] for tau in trajectories],
+                             axis=0)
         acs = np.concatenate([tau["action"] for tau in trajectories], axis=0)
         actions_log_prob = self.actor.log_prob(
-            torch.tensor(obs, dtype=torch.float64), torch.tensor(acs, dtype=torch.int64)
+            torch.tensor(obs, dtype=torch.float64),
+            torch.tensor(acs, dtype=torch.int64)
         )
 
         reward_to_go = np.concatenate(
@@ -142,8 +146,8 @@ class PolicyGradientAgent:
         )
         if reward_to_go.shape[0] != acs.shape[0]:
             raise ValueError(
-                "Array dimension mismatch, expected same number of rewards and "
-                "actions. Observed %d rewards, %d actions."
+                "Array dimension mismatch, expected same number of rewards "
+                "and actions. Observed %d rewards, %d actions."
                 % (reward_to_go.shape[0], acs.shape[0])
             )
 
@@ -161,19 +165,21 @@ class PolicyGradientAgent:
 
         Parameters
         ----------
-        rewards: A list of rewards {r_0, r_1, ..., r_t', ... r_{T-1}} from a single
-        rollout of length T.
+        rewards: A list of rewards {r_0, r_1, ..., r_t', ... r_{T-1}} from a
+        single rollout of length T.
 
         Returns
         -------
-        A numpy array where the entry at index t is sum_{t'=t}^{T-1} gamma^(t'-t) * r_{t'}.
+        A numpy array where the entry at index t is sum_{t'=t}^{T-1}
+        gamma^(t'-t) * r_{t'}.
         """
         all_discounted_cumsums = []
         # for loop over steps (t) of the given rollout
         for start_time_index in range(len(rewards)):
             indices = np.arange(start_time_index, len(rewards))
             discounts = self.gamma ** (indices - start_time_index)
-            all_discounted_cumsums.append(sum(discounts * rewards[start_time_index:]))
+            all_discounted_cumsums\
+                .append(sum(discounts * rewards[start_time_index:]))
         return np.array(all_discounted_cumsums)
 
 
@@ -183,7 +189,8 @@ class PolicyGradientAgent:
 
 
 def run_training_loop(
-        env, n_iter=200, max_episode_length=100, batch_size=512, learning_rate=1e-2
+        env, n_iter=200, max_episode_length=100, batch_size=512,
+        learning_rate=1e-2
 ):
     """Trains a neural network policy using policy gradients.
     Parameters
@@ -249,8 +256,9 @@ def sample_n_trajectories(env, policy, n_trajectories, max_episode_length):
 
     Returns
     -------
-    A list of n_trajectories dictionaries, each dictionary maps keys `observation`, `action`,
-    `reward`, `next_observation`, `terminal` to numpy arrays of size episode length.
+    A list of n_trajectories dictionaries, each dictionary maps keys
+    `observation`, `action`,`reward`, `next_observation`, `terminal` to
+    numpy arrays of size episode length.
     """
     trajectories = []
     for i in range(n_trajectories):
@@ -263,19 +271,21 @@ def sample_n_trajectories(env, policy, n_trajectories, max_episode_length):
 def sample_trajectories_by_batch_size(
         env, policy, min_timesteps_per_batch, max_episode_length
 ):
-    """Sample multiple trajectories using the given policy to achieve total number of steps.
+    """Sample multiple trajectories using the given policy to achieve total
+    number of steps.
 
     Parameters
     ----------
     env: A WhyNot gym environment.
     policy: An instance of Policy.
-    min_timesteps_per_batch: Desired number of timesteps in all trajectories combined.
-    max_episode_length: Cap on max length for each episode.
+    min_timesteps_per_batch: Desired number of timesteps in all trajectories
+    combined. max_episode_length: Cap on max length for each episode.
 
     Returns
     -------
-    A list of n dictionaries, each dictionary maps keys `observation`, `action`,
-    `reward`, `next_observation`, `terminal` to numpy arrays of size episode length.
+    A list of n dictionaries, each dictionary maps keys `observation`,
+    `action`, `reward`, `next_observation`, `terminal` to numpy arrays of size
+    episode length.
     """
     timesteps_this_batch = 0
     trajectories = []
@@ -316,7 +326,8 @@ def sample_trajectory(env, policy, max_episode_length):
         next_obs.append(ob)
         rewards.append(rew)
         # End the rollout if the rollout ended
-        # Note that the rollout can end due to done, or due to max_episode_length
+        # Note that the rollout can end due to done, or due to max_episode_
+        # length
         if done or steps > max_episode_length:
             rollout_done = 1
         else:
@@ -371,12 +382,15 @@ def plot_sample_trajectory(env, policies, max_episode_length, state_names):
             axes[i].plot(y, label=name)
             axes[i].set_ylabel("log " + state_names[i])
             ymin, ymax = axes[i].get_ylim()
-            axes[i].set_ylim(np.minimum(ymin, y.min()), np.maximum(ymax, y.max()))
+            axes[i].set_ylim(np.minimum(ymin, y.min()), np.maximum(ymax,
+                                                                   y.max()))
 
         # Plot actions
         action = np.array(trajectory["action"])
-        epsilon_1 = np.logical_or((action == 2), (action == 3)).astype(float) * 0.7
-        epsilon_2 = np.logical_or((action == 1), (action == 3)).astype(float) * 0.3
+        epsilon_1 = np.logical_or(
+            (action == 2), (action == 3)).astype(float) * 0.7
+        epsilon_2 = np.logical_or(
+            (action == 1), (action == 3)).astype(float) * 0.3
         axes[-3].plot(epsilon_1, label=name)
         axes[-3].set_ylabel("Treatment epsilon_1")
         axes[-3].set_ylim(-0.1, 1.0)

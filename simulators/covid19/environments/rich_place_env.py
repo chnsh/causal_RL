@@ -30,20 +30,21 @@ def get_intervention(action, time):
 
 
 def get_reward(intervention, state, time):
-    """Compute the reward based on the observed state and choosen intervention."""
+    """Compute the reward based on the observed state and choosen
+    intervention."""
     value_of_individual = 1
     economic_output_per_time = 100000
     current_social_distancing = 1 - intervention.updates['beta_scale_factor']
 
     reward = value_of_individual * (-state.deceased + state.susceptible)
-    reward -= economic_output_per_time * current_social_distancing  # lost economic output per time
+    # lost economic output per time
+    reward -= economic_output_per_time * current_social_distancing
 
     return reward
 
 
 def observation_space():
     """Return observation space.
- 
     The state is (susceptible, exposed, infected, recovered).
     """
     state_dim = State.num_variables()
@@ -64,5 +65,6 @@ Covid19Env = ODEEnvBuilder(
 )
 
 register(
-    id="COVID19-RICH-v0", entry_point=Covid19Env, max_episode_steps=150, reward_threshold=1e10,
+    id="COVID19-RICH-v0", entry_point=Covid19Env, max_episode_steps=150,
+    reward_threshold=1e10,
 )

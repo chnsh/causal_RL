@@ -1,7 +1,6 @@
 """Experiments for COVID-19 simulator."""
 
 from whynot.dynamics import DynamicsExperiment
-from whynot.framework import parameter
 from simulators import covid19
 
 
@@ -39,45 +38,3 @@ COVID19RCT = DynamicsExperiment(
     outcome_extractor=lambda run: run[99].infected,
     covariate_builder=lambda run: run.initial_state.values(),
 )
-
-
-##########################
-# Confounding Experiments
-##########################
-
-
-# @parameter(
-#     name="treatment_bias",
-#     default=0.9,
-#     description="Treatment probability bias between more infected and less infected units.",
-# )
-# def hiv_confounded_propensity(untreated_run, treatment_bias):
-#     """Probability of treating each unit.
-
-#     We are more likely to treat units with high immune response and free virus.
-#     """
-#     if (
-#         untreated_run.initial_state.immune_response > 10
-#         and untreated_run.initial_state.free_virus > 1
-#     ):
-#         return treatment_bias
-
-#     return 1.0 - treatment_bias
-
-
-# # pylint: disable-msg=invalid-name
-# #: Experiment on effect of increased drug efficacy on infected macrophages with confounding
-# HIVConfounding = DynamicsExperiment(
-#     name="HIVConfounding",
-#     description=(
-#         "Study effect of increased drug efficacy on infected macrophages (cells/ml). "
-#         "Units with high immune response and free virus are more likely to be treated."
-#     ),
-#     simulator=covid19,
-#     simulator_config=covid19.Config(start_time=0, end_time=200),
-#     intervention=hiv.Intervention(time=100, epsilon_1=0.5),
-#     state_sampler=sample_initial_states,
-#     propensity_scorer=hiv_confounded_propensity,
-#     outcome_extractor=lambda run: run[149].infected_T2,
-#     covariate_builder=lambda intervention, run: run.initial_state.values(),
-# )
