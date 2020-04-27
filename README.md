@@ -17,6 +17,8 @@ different reward functions. We can also observe the effect of confounding variab
 to a social distancing, which would have an effect both on the policies being taken and on the degree of perturbation 
 of regular life in a community. This code is an extension of the [whynot](https://github.com/zykls/whynot) package.
 
+[Video abstract](https://youtu.be/J_BRl5kU02I)
+
 ## How to explore this project
 A good starting point is the `covid19_simulator.ipynb` notebook. It contains explanations of all the concepts that are 
 being explored in this project as well as examples on how to use the environment implemented.
