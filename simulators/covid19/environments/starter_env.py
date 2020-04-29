@@ -28,8 +28,7 @@ def get_reward(intervention, state, time):
     """Compute the reward based on the observed state and
     choosen intervention."""
 
-    reward = 100 * state.susceptible - 100 * (state.hospitalized - 1000
-                                              * state.deceased)
+    reward = 100 * state.susceptible - 100 * state.hospitalized - 1000 * state.deceased
     return reward
 
 
